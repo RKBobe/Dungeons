@@ -1,24 +1,40 @@
+# character.py
 from attributes import Attributes
+from character_class import CharacterClass
 
 class PlayerCharacter:
-    def __init__(self, name, hp, attributes):
-        self.name = name
-        self.max_hp = hp
-        self.current_hp = hp
-        self.attributes = attributes  #instance of Attributes class
+  """The player's character, composed of other objects."""
+  def __init__(self, name, attributes, character_class):
+    self.name = name
+    self.attributes = attributes
+    self.character_class = character_class
 
-    def __str__(self):
-        return (
-            f"Name: {self.name}\n"
-            f"HP: {self.current_hp}/{self.max_hp}\n"
-            f"Attributes:\n"
-            f"  Strength: {self.attributes.strength}\n"
-            f"  Dexterity: {self.attributes.dexterity}\n"
-            f"  Intelligence: {self.attributes.intelligence}\n"
-            f"  Constitution: {self.attributes.constitution}\n"
-            f"  Wisdom: {self.attributes.wisdom}\n"
-            f"  Charisma: {self.attributes.charisma}\n"     
-        )
-    def is_alive(self):
-        """Returns True if the character is alive (hp>0), else False."""
-        return self.current_hp > 0
+    # Calculate HP
+    con_modifier = (self.attributes.constitution - 10) // 2
+    self.max_hp = self.character_class.hit_die + con_modifier
+    self.current_hp = self.max_hp
+
+    # Copy proficiencies from the chosen class
+    self.saving_throws = character_class.saving_throws
+    self.armor_proficiencies = character_class.armor_proficiencies
+    self.weapon_proficiencies = character_class.weapon_proficiencies
+
+    # We will handle choosing skills in a later step
+    self.skills = []
+
+
+  def __str__(self):
+    attrs = self.attributes
+    return (
+      f"Name: {self.name}\n"
+      f"Class: {self.character_class.name}\n"
+      f"HP: {self.current_hp}/{self.max_hp}\n"
+      f"Saving Throws: {', '.join(self.saving_throws)}\n"
+      f"--- Attributes ---\n"
+      f"STR: {attrs.strength}, DEX: {attrs.dexterity}, CON: {attrs.constitution}\n"
+      f"INT: {attrs.intelligence}, WIS: {attrs.wisdom}, CHA: {attrs.charisma}"
+    )
+
+  def is_alive(self):
+    """Returns True if the character's HP is above 0."""
+    return self.current_hp > 0

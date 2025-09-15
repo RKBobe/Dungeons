@@ -2,31 +2,49 @@
 from character import PlayerCharacter
 from attributes import Attributes
 from attribute_generator import run_generator
+from attribute_assigner import run_assignment # Import the new function
+from character_class import CLASSES
+from skill_selector import run_skill_selection
 
 def main():
   """Main function to run the game."""
   print("Welcome to your D&D character creator!")
-  
-  # Run the interactive attribute generator
+
+  # 1. Generate Attributes from the grid
   scores = run_generator()
+
+  # 2. Assign the chosen scores -- NEW STEP
+  final_attributes = run_assignment(scores)
   
-  # For now, we'll auto-assign them. We can let the player assign them later.
-  # We'll also add the other 3 attributes to the class.
-  player_attrs = Attributes(
-    strength=scores[0],
-    dexterity=scores[1],
-    constitution=scores[2],
-    intelligence=scores[3], # We'll uncomment these once we add them
-    wisdom=scores[4],
-    charisma=scores[5]
+  # Create the Attributes object using the assigned scores
+  # The ** operator unpacks the dictionary into keyword arguments
+  # e.g., Attributes(strength=18, dexterity=15, ...)
+  player_attrs = Attributes(**final_attributes)
+
+  # 3. Choose a Class
+  print("\n--- Choose your Class ---")
+  for key in CLASSES:
+      print(f"- {CLASSES[key].name}")
+
+  chosen_class = None
+  while not chosen_class:
+      selection = input("Enter class name: ").lower().strip()
+      if selection in CLASSES:
+          chosen_class = CLASSES[selection]
+      else:
+          print("Invalid class. Please choose from the list.")
+
+  # 4. Create the Player Character
+  player = PlayerCharacter(
+      name="Valerius",
+      attributes=player_attrs,
+      character_class=chosen_class
   )
-  
-  # NOTE: We need to update the Attributes and PlayerCharacter classes
-  # to handle all 6 attributes to make this fully work.
-  # For now, this demonstrates the system.
-  
-  player = PlayerCharacter(name="Valerius", hp=25, attributes=player_attrs)
-  
+
+  # 5. Choose Skills
+  player.skills = run_skill_selection(player)
+
+  # 6. Display Final Character
   print("\n--- Your Character Has Been Created ---")
   print(player)
 
